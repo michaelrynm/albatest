@@ -1,61 +1,179 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 📌 Blog API (Laravel + Sanctum + Spatie Media Library)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+REST API untuk **User, Category, Post, Bookmark** dengan autentikasi token (Sanctum) dan upload cover image (Spatie Media Library).  
+Dilengkapi API documentation (OpenAPI/Swagger), pagination, dan soft delete.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Features
+- Autentikasi: **Register, Login, Logout** (Laravel Sanctum)
+- User profile (update name & bio)
+- Category CRUD (soft delete)
+- Post CRUD:
+  - Relasi **User → hasMany → Post**
+  - Relasi **Post → belongsTo → Category**
+  - Upload **cover image** (Spatie Media Library)
+  - Soft delete
+- Bookmark:
+  - Relasi **User ↔ many-to-many ↔ Post**
+  - Toggle bookmark/unbookmark
+  - Soft delete pivot
+- API Resource (response JSON konsisten)
+- Pagination untuk semua list
+- API Docs dengan **OpenAPI/Swagger**
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 📋 Requirements
+- PHP >= 8.2
+- Composer
+- SQLite (untuk database dev/testing)
+- Node.js & npm/yarn (opsional, hanya jika butuh front-end assets)
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## 🔧 Setup Project
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+1. **Clone repository**
+   ```bash
+   git clone https://github.com/your-username/blog-api.git
+   cd blog-api
+   ```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+2. **Install dependencies**
+   ```bash
+   composer install
+   ```
 
-## Laravel Sponsors
+3. **Konfigurasi environment**
+   - Copy `.env.example` ke `.env`:
+     ```bash
+     cp .env.example .env
+     ```
+   - Ubah konfigurasi DB untuk pakai SQLite:
+     ```env
+     DB_CONNECTION=sqlite
+     DB_DATABASE=/absolute/path/to/database/database.sqlite
+     ```
+   - Buat file kosong untuk SQLite:
+     ```bash
+     touch database/database.sqlite
+     ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+4. **Generate key**
+   ```bash
+   php artisan key:generate
+   ```
 
-### Premium Partners
+5. **Migrate & seed database**
+   ```bash
+   php artisan migrate --seed
+   ```
+   Seeder otomatis membuat:
+   - 1 akun admin → `admin@mail.com` / `password`
+   - 10 user dummy
+   - 5 kategori default + random
+   - 20 post dummy
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+6. **Link storage (untuk upload cover image)**
+   ```bash
+   php artisan storage:link
+   ```
 
-## Contributing
+7. **Run server**
+   ```bash
+   php artisan serve
+   ```
+   Akses di: [http://localhost:8000](http://localhost:8000)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## 📂 API Endpoint
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Semua endpoint ada di prefix `/api`.
 
-## Security Vulnerabilities
+### 🔑 Auth
+- `POST /api/auth/register` → registrasi user
+- `POST /api/auth/login` → login, dapatkan token
+- `POST /api/auth/logout` → logout (revoke token)
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 👤 User
+- `GET /api/users/me` → lihat profil user login
+- `PUT /api/users/me` → update profil (name, bio)
 
-## License
+### 🗂️ Category
+- `GET /api/categories` → list categories (pagination)
+- `POST /api/categories` → buat kategori
+- `GET /api/categories/{id}` → detail kategori
+- `PUT /api/categories/{id}` → update kategori
+- `DELETE /api/categories/{id}` → hapus kategori (soft delete)
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 📝 Post
+- `GET /api/posts` → list posts (pagination, filter `?search=`, `?category_id=`)
+- `POST /api/posts` → buat post (multipart: `title`, `content`, `category_id`, `cover`)
+- `GET /api/posts/{id}` → detail post
+- `PUT /api/posts/{id}` → update post (hanya author)
+- `DELETE /api/posts/{id}` → hapus post (soft delete, hanya author)
+
+### 🔖 Bookmark
+- `POST /api/posts/{id}/bookmark` → toggle bookmark/unbookmark
+- `GET /api/bookmarks` → list post yang di-bookmark user (pagination)
+
+---
+
+## 🔑 Authentication
+
+Semua endpoint (kecuali register/login) dilindungi middleware **Laravel Sanctum**.  
+Gunakan **Bearer Token**:
+
+```
+Authorization: Bearer {token}
+Accept: application/json
+```
+
+Token diperoleh dari endpoint `POST /api/auth/login`.
+
+---
+
+## 📑 API Documentation (Swagger)
+
+- File OpenAPI tersedia di:
+  - `resources/api/openapi.yaml` → file sumber utama
+  - `public/openapi.yaml` → file publik untuk Swagger UI
+- Halaman Swagger UI bisa diakses di:
+  ```
+  http://localhost:8000/docs
+  ```
+- Bisa juga langsung load file `openapi.yaml` ke [Swagger Editor](https://editor.swagger.io).
+
+---
+
+## 🗄️ Database Seeding
+
+Seeder default (`php artisan migrate:fresh --seed`) akan membuat:
+- **Admin user** → email: `admin@mail.com`, password: `password`
+- **10 user random**
+- **10 kategori** (5 default + 5 acak)
+- **20 post random** (user + kategori acak)
+
+---
+
+## 🧰 Development Tips
+
+- **Clear cache**
+  ```bash
+  php artisan optimize:clear
+  ```
+- **Refresh DB**
+  ```bash
+  php artisan migrate:fresh --seed
+  ```
+- **Test upload cover via curl**
+  ```bash
+  curl -X POST http://localhost:8000/api/posts     -H "Authorization: Bearer {TOKEN}"     -F "title=Hello World"     -F "content=This is content"     -F "category_id=1"     -F "cover=@/path/to/image.jpg"
+  ```
+
+---
+
+## 📜 License
+MIT
